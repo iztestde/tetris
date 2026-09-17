@@ -1,0 +1,2832 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+  <meta name="theme-color" content="#30384e">
+  <title>Block Pocket 3D Challenge</title>
+
+  <style>
+    :root {
+      --device-light: #eef2f4;
+      --device-mid: #bbc5cc;
+      --device-dark: #707b85;
+      --text: #303747;
+      --pink: #dc4778;
+      --blue: #477dcc;
+      --screen-light: #effdff;
+      --screen-mid: #d1f3fa;
+      --screen-dark: #addbe8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overscroll-behavior: none;
+    }
+
+    body {
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding:
+        max(4px, env(safe-area-inset-top))
+        max(4px, env(safe-area-inset-right))
+        max(4px, env(safe-area-inset-bottom))
+        max(4px, env(safe-area-inset-left));
+      overflow: hidden;
+      color: var(--text);
+      font-family: Tahoma, "Noto Sans Thai", sans-serif;
+      background:
+        radial-gradient(circle at 15% 10%, #8190b5 0, transparent 32%),
+        radial-gradient(circle at 90% 90%, #4f5977 0, transparent 38%),
+        linear-gradient(145deg, #252b3d, #47516d);
+    }
+
+    button {
+      border: 0;
+      color: inherit;
+      font: inherit;
+      cursor: pointer;
+      user-select: none;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* =========================
+       ตัวเครื่องเกม
+    ========================== */
+
+    .device {
+      display: grid;
+      width: min(780px, 100%);
+      height: calc(100vh - 8px);
+      height: calc(100dvh - 8px);
+      margin: auto;
+      padding: clamp(6px, 1.3vw, 12px);
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: clamp(5px, 1vh, 9px);
+      overflow: hidden;
+      border: 3px solid #fbfcfd;
+      border-right-color: #818b94;
+      border-bottom-color: #69747d;
+      border-radius: 25px 25px 52px 25px;
+      background:
+        linear-gradient(120deg, rgba(255,255,255,.72), transparent 23%),
+        linear-gradient(145deg, var(--device-light), var(--device-mid));
+      box-shadow:
+        inset 5px 5px 9px rgba(255,255,255,.75),
+        inset -8px -8px 12px rgba(50,60,70,.24),
+        0 18px 44px rgba(0,0,0,.4);
+    }
+
+    .device-header {
+      display: flex;
+      min-height: 32px;
+      padding: 0 5px;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .brand {
+      min-width: 0;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: #303749;
+      font-size: clamp(.92rem, 3.5vw, 1.42rem);
+      font-style: italic;
+      line-height: 1;
+      letter-spacing: .04em;
+      text-shadow: 0 2px white;
+    }
+
+    .brand small {
+      display: block;
+      margin-top: 2px;
+      color: #69727d;
+      font-size: clamp(.41rem, 1.35vw, .56rem);
+      font-weight: 700;
+      letter-spacing: .13em;
+    }
+
+    .stats-button {
+      min-height: 29px;
+      padding: 4px 10px;
+      border: 2px solid white;
+      border-right-color: #7b858e;
+      border-bottom-color: #69737c;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(#737d90, #4e5769);
+      box-shadow: 0 3px 3px rgba(31,38,48,.25);
+      font-size: clamp(.53rem, 1.6vw, .66rem);
+      font-weight: 700;
+    }
+
+    .stats-button:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 2px rgba(31,38,48,.2);
+    }
+
+    /* =========================
+       พื้นที่เล่น
+    ========================== */
+
+    .game-section {
+      display: grid;
+      min-height: 0;
+      padding: clamp(4px, 1vw, 8px);
+      grid-template-columns: minmax(0, 1fr) clamp(67px, 13vw, 96px);
+      gap: clamp(4px, 1vw, 8px);
+      overflow: hidden;
+      border: clamp(6px, 1.4vw, 10px) solid #566174;
+      border-top-color: #394152;
+      border-left-color: #40495b;
+      border-radius: 18px 18px 30px 18px;
+      background: #63748d;
+      box-shadow:
+        inset 0 0 25px rgba(21,29,42,.55),
+        0 4px 0 rgba(255,255,255,.45);
+    }
+
+    .canvas-wrap {
+      position: relative;
+      display: grid;
+      min-width: 0;
+      min-height: 0;
+      place-items: center;
+      overflow: hidden;
+      border: 3px solid #263a50;
+      border-radius: 8px;
+      background: #e9fbff;
+      box-shadow:
+        inset 0 0 20px rgba(27,91,117,.14),
+        0 0 0 2px #8ca6b5,
+        0 0 18px rgba(126,225,255,.32);
+    }
+
+    #gameCanvas {
+      display: block;
+      width: auto;
+      max-width: 100%;
+      height: 100%;
+      max-height: 100%;
+      aspect-ratio: 1 / 2;
+      background: var(--screen-light);
+    }
+
+    .side-hud {
+      display: flex;
+      min-width: 0;
+      min-height: 0;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .hud-box {
+      padding: 4px 5px;
+      overflow: hidden;
+      border: 2px solid #617578;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #e0f5d9, #adc5a9);
+      box-shadow:
+        inset 2px 2px 4px rgba(33,45,39,.23),
+        inset -2px -2px 4px rgba(255,255,255,.4);
+      font-family: "Courier New", monospace;
+    }
+
+    .hud-label {
+      display: block;
+      color: #435047;
+      font-size: clamp(.4rem, 1.3vw, .55rem);
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+
+    .hud-value {
+      display: block;
+      overflow: hidden;
+      color: #15271f;
+      font-size: clamp(.7rem, 2.5vw, 1rem);
+      font-weight: 700;
+      line-height: 1.05;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .next-box {
+      padding: 3px;
+      border: 2px solid #617578;
+      border-radius: 8px;
+      background: linear-gradient(145deg, #e0f5d9, #adc5a9);
+      box-shadow:
+        inset 2px 2px 4px rgba(33,45,39,.23),
+        inset -2px -2px 4px rgba(255,255,255,.4);
+    }
+
+    .next-title {
+      margin: 0 0 1px;
+      color: #35423a;
+      font: 700 clamp(.4rem, 1.2vw, .52rem) "Courier New", monospace;
+      text-align: center;
+    }
+
+    #nextCanvas {
+      display: block;
+      width: min(100%, 45px);
+      aspect-ratio: 1;
+      margin: auto;
+      border: 1px solid rgba(43,70,58,.25);
+      border-radius: 4px;
+      background: #effbea;
+    }
+
+    .mode-box,
+    .difficulty-box {
+      padding: 4px 2px;
+      border-radius: 7px;
+      color: white;
+      background: linear-gradient(#6b7589, #465064);
+      font-size: clamp(.39rem, 1.1vw, .51rem);
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .difficulty-box.challenge {
+      background: linear-gradient(#e1706b, #9e3c4f);
+    }
+
+    .power-light {
+      display: flex;
+      margin-top: auto;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      color: #e4edf5;
+      font-size: .45rem;
+      font-weight: 700;
+    }
+
+    .power-light::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #ff496d;
+      box-shadow: 0 0 7px #ff5575;
+      content: "";
+    }
+
+    /* =========================
+       ปุ่มควบคุมด้านล่าง
+    ========================== */
+
+    .controls {
+      display: grid;
+      min-height: clamp(148px, 24vh, 215px);
+      padding: 3px clamp(3px, 1.5vw, 12px) 5px;
+      grid-template-columns:
+        minmax(0, 1.25fr)
+        minmax(58px, .42fr)
+        minmax(105px, .75fr);
+      align-items: center;
+      gap: clamp(6px, 2vw, 18px);
+    }
+
+    .movement-area {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(4px, 1.1vw, 9px);
+      align-items: center;
+    }
+
+    .movement-button {
+      display: grid;
+      width: 100%;
+      min-height: clamp(68px, 12vh, 98px);
+      padding: 5px 2px;
+      place-items: center;
+      border: 4px solid #626b75;
+      border-top-color: #a5adb4;
+      border-left-color: #939ba3;
+      border-radius: 16px;
+      color: #edf0f2;
+      background: linear-gradient(145deg, #555d67, #252a32);
+      box-shadow:
+        inset 4px 4px 5px rgba(255,255,255,.13),
+        inset -5px -5px 6px rgba(0,0,0,.35),
+        0 6px 5px rgba(38,45,52,.32);
+      font-size: clamp(1.25rem, 5.5vw, 2.15rem);
+      font-weight: 700;
+    }
+
+    .movement-button small {
+      display: block;
+      margin-top: -6px;
+      font-size: clamp(.43rem, 1.3vw, .61rem);
+      line-height: 1;
+    }
+
+    .movement-button:active,
+    .movement-button.pressed {
+      transform: translateY(4px);
+      background: #252a31;
+      box-shadow:
+        inset 4px 4px 6px rgba(0,0,0,.3),
+        0 2px 2px rgba(38,45,52,.25);
+    }
+
+    .system-area {
+      display: grid;
+      align-content: center;
+      gap: 10px;
+    }
+
+    .system-button {
+      min-height: 34px;
+      padding: 5px 3px;
+      border: 2px solid white;
+      border-right-color: #79838d;
+      border-bottom-color: #68727c;
+      border-radius: 999px;
+      color: white;
+      background: linear-gradient(#78818e, #515a65);
+      box-shadow: 0 4px 4px rgba(37,44,52,.27);
+      font-size: clamp(.46rem, 1.25vw, .59rem);
+      font-weight: 700;
+      line-height: 1.15;
+      text-align: center;
+    }
+
+    .system-button.restart {
+      background: linear-gradient(#7196d0, #42669d);
+    }
+
+    .system-button:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 2px rgba(37,44,52,.22);
+    }
+
+    .rotate-area {
+      display: grid;
+      place-items: center;
+    }
+
+    .rotate-button {
+      display: grid;
+      width: min(100%, 145px);
+      aspect-ratio: 1;
+      padding: 8px;
+      place-items: center;
+      border: clamp(4px, 1vw, 6px) solid #f4aac2;
+      border-right-color: #9b2d55;
+      border-bottom-color: #802241;
+      border-radius: 50%;
+      color: white;
+      background:
+        radial-gradient(circle at 30% 23%, #ffb8ce, transparent 18%),
+        linear-gradient(145deg, #ef648f, #ae2955);
+      box-shadow:
+        inset 5px 5px 7px rgba(255,255,255,.25),
+        inset -6px -6px 8px rgba(84,0,31,.3),
+        0 8px 7px rgba(70,36,50,.32);
+      font-size: clamp(.68rem, 2.4vw, .96rem);
+      font-weight: 700;
+      line-height: 1.05;
+      text-align: center;
+    }
+
+    .rotate-symbol {
+      display: block;
+      font-size: clamp(2.1rem, 8vw, 3.8rem);
+      line-height: .8;
+    }
+
+    .rotate-button:active,
+    .rotate-button.pressed {
+      transform: translateY(5px);
+      box-shadow:
+        inset 5px 5px 8px rgba(0,0,0,.2),
+        0 2px 2px rgba(40,35,48,.25);
+    }
+
+    /* =========================
+       หน้าต่าง
+    ========================== */
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: grid;
+      padding: 14px;
+      place-items: center;
+      background: rgba(19,24,36,.83);
+      backdrop-filter: blur(7px);
+    }
+
+    .modal {
+      width: min(530px, 100%);
+      max-height: 94vh;
+      padding: clamp(16px, 4vw, 26px);
+      overflow: auto;
+      border: 5px solid #f4f6f7;
+      border-right-color: #7e8891;
+      border-bottom-color: #69747d;
+      border-radius: 26px;
+      background: linear-gradient(145deg, #e9edef, #b3bdc5);
+      box-shadow:
+        inset 5px 5px 8px rgba(255,255,255,.7),
+        inset -6px -6px 9px rgba(51,60,69,.23),
+        0 25px 65px rgba(0,0,0,.45);
+      text-align: center;
+    }
+
+    .modal-icon {
+      font-size: clamp(2.5rem, 11vw, 4.5rem);
+      line-height: 1;
+    }
+
+    .modal h2 {
+      margin: 7px 0 4px;
+      color: #343b4d;
+      font-size: clamp(1.25rem, 5vw, 1.85rem);
+      text-shadow: 0 2px white;
+    }
+
+    .modal-text {
+      margin: 4px 0 13px;
+      color: #626b76;
+      font-size: .8rem;
+      line-height: 1.5;
+    }
+
+    .selection-title {
+      margin: 13px 0 7px;
+      color: #4b5364;
+      font-size: .78rem;
+      text-align: left;
+    }
+
+    .selection-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .selection-button {
+      display: grid;
+      min-height: 76px;
+      padding: 10px;
+      grid-template-columns: 40px 1fr;
+      align-items: center;
+      gap: 7px;
+      border: 3px solid white;
+      border-right-color: #7b858f;
+      border-bottom-color: #68737d;
+      border-radius: 15px;
+      color: #343b49;
+      background: linear-gradient(145deg, #fafbfc, #c2c9ce);
+      box-shadow: 0 4px 4px rgba(49,57,66,.2);
+      text-align: left;
+      transition: .15s ease;
+    }
+
+    .selection-button:hover {
+      transform: translateY(-2px);
+      border-color: #9ecfff;
+    }
+
+    .selection-button.selected {
+      border-color: #4a83d5;
+      background: #eaf5ff;
+      box-shadow:
+        0 0 0 3px rgba(74,131,213,.2),
+        0 4px 4px rgba(49,57,66,.2);
+    }
+
+    .selection-button.challenge.selected {
+      border-color: #ed5a79;
+      background: #fff0f4;
+      box-shadow:
+        0 0 0 3px rgba(237,90,121,.2),
+        0 4px 4px rgba(49,57,66,.2);
+    }
+
+    .selection-icon {
+      font-size: 1.8rem;
+      text-align: center;
+    }
+
+    .selection-name {
+      display: block;
+      font-size: .82rem;
+      font-weight: 700;
+    }
+
+    .selection-description {
+      display: block;
+      margin-top: 3px;
+      color: #68717c;
+      font-size: .62rem;
+      line-height: 1.35;
+    }
+
+    .start-game-button {
+      width: 100%;
+      min-height: 51px;
+      margin-top: 15px;
+      padding: 10px;
+      border: 3px solid white;
+      border-right-color: #922f54;
+      border-bottom-color: #7e2547;
+      border-radius: 16px;
+      color: white;
+      background: linear-gradient(145deg, #f16e98, #b83460);
+      box-shadow: 0 6px 5px rgba(64,40,51,.25);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .start-game-button:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 2px rgba(64,40,51,.2);
+    }
+
+    .statistics {
+      display: grid;
+      margin: 14px 0;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 7px;
+    }
+
+    .statistic-item {
+      padding: 10px 6px;
+      border: 2px solid #75827a;
+      border-radius: 11px;
+      background: #c4d9be;
+      box-shadow: inset 2px 2px 5px rgba(35,47,40,.2);
+    }
+
+    .statistic-item span {
+      display: block;
+      color: #435047;
+      font-size: .62rem;
+      font-weight: 700;
+    }
+
+    .statistic-item strong {
+      display: block;
+      color: #1f2c25;
+      font: 700 1.08rem "Courier New", monospace;
+    }
+
+    .modal-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .modal-action {
+      min-height: 47px;
+      padding: 9px;
+      border: 3px solid white;
+      border-right-color: #76818c;
+      border-bottom-color: #66717b;
+      border-radius: 14px;
+      color: white;
+      background: linear-gradient(145deg, #6590d2, #3a5e9b);
+      font-weight: 700;
+    }
+
+    .modal-action.pink {
+      background: linear-gradient(145deg, #ef7098, #b33661);
+    }
+
+    @media (max-width: 500px) {
+      .device {
+        padding: 5px;
+        gap: 5px;
+        border-radius: 18px 18px 33px 18px;
+      }
+
+      .game-section {
+        padding: 4px;
+        grid-template-columns: minmax(0, 1fr) 67px;
+        border-width: 6px;
+      }
+
+      .side-hud {
+        gap: 3px;
+      }
+
+      .hud-box {
+        padding: 3px;
+      }
+
+      #nextCanvas {
+        width: 39px;
+      }
+
+      .controls {
+        min-height: clamp(143px, 24vh, 188px);
+        padding: 1px;
+        grid-template-columns:
+          minmax(0, 1.3fr)
+          minmax(48px, .4fr)
+          minmax(90px, .78fr);
+        gap: 5px;
+      }
+
+      .movement-area {
+        gap: 3px;
+      }
+
+      .movement-button {
+        min-height: clamp(64px, 11vh, 82px);
+        border-width: 3px;
+        border-radius: 12px;
+      }
+
+      .system-area {
+        gap: 7px;
+      }
+
+      .system-button {
+        min-height: 31px;
+        padding: 4px 2px;
+      }
+
+      .rotate-button {
+        border-width: 4px;
+      }
+
+      .brand small {
+        display: none;
+      }
+
+      .selection-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .selection-button {
+        min-height: 64px;
+      }
+    }
+
+    @media (max-height: 610px) {
+      .device-header {
+        min-height: 25px;
+      }
+
+      .controls {
+        min-height: 118px;
+      }
+
+      .movement-button {
+        min-height: 60px;
+      }
+
+      .rotate-button {
+        width: min(100%, 105px);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="device">
+    <header class="device-header">
+      <div class="brand">
+        <h1>BLOCK POCKET 3D</h1>
+        <small>RETRO CHALLENGE SYSTEM</small>
+      </div>
+
+      <button id="statsButton" class="stats-button" type="button">
+        📊 สถิติ
+      </button>
+    </header>
+
+    <section class="game-section">
+      <div class="canvas-wrap">
+        <canvas
+          id="gameCanvas"
+          width="300"
+          height="600"
+          aria-label="กระดานเกมบล็อก"
+        ></canvas>
+      </div>
+
+      <aside class="side-hud">
+        <div class="hud-box">
+          <span class="hud-label">SCORE</span>
+          <span id="score" class="hud-value">0</span>
+        </div>
+
+        <div class="hud-box">
+          <span class="hud-label">BEST</span>
+          <span id="bestScore" class="hud-value">0</span>
+        </div>
+
+        <div class="hud-box">
+          <span class="hud-label">LINES</span>
+          <span id="lines" class="hud-value">0</span>
+        </div>
+
+        <div class="hud-box">
+          <span class="hud-label">LEVEL</span>
+          <span id="level" class="hud-value">1</span>
+        </div>
+
+        <div class="next-box">
+          <p class="next-title">NEXT</p>
+          <canvas id="nextCanvas" width="64" height="64"></canvas>
+        </div>
+
+        <div id="modeBox" class="mode-box">⚡ เร็วขึ้น</div>
+        <div id="difficultyBox" class="difficulty-box">มาตรฐาน</div>
+        <div class="power-light">POWER</div>
+      </aside>
+    </section>
+
+    <section class="controls" aria-label="ปุ่มควบคุม">
+      <div class="movement-area">
+        <button id="leftButton" class="movement-button" type="button">
+          ◀
+          <small>ซ้าย</small>
+        </button>
+
+        <button id="downButton" class="movement-button" type="button">
+          ▼
+          <small>ลงเร็ว</small>
+        </button>
+
+        <button id="rightButton" class="movement-button" type="button">
+          ▶
+          <small>ขวา</small>
+        </button>
+      </div>
+
+      <div class="system-area">
+        <button id="pauseButton" class="system-button" type="button">
+          ⏸<br>หยุด
+        </button>
+
+        <button
+          id="restartButton"
+          class="system-button restart"
+          type="button"
+        >
+          ↻<br>เริ่มใหม่
+        </button>
+      </div>
+
+      <div class="rotate-area">
+        <button id="rotateButton" class="rotate-button" type="button">
+          <span>
+            <span class="rotate-symbol">↻</span>
+            หมุนบล็อก
+          </span>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- เลือกโหมด -->
+  <div id="startOverlay" class="overlay">
+    <section class="modal">
+      <div class="modal-icon">🧱</div>
+      <h2>BLOCK POCKET 3D</h2>
+      <p class="modal-text">
+        เลือกรูปแบบความเร็วและชุดบล็อกก่อนเริ่มเกม
+      </p>
+
+      <h3 class="selection-title">1. รูปแบบความเร็ว</h3>
+
+      <div class="selection-grid">
+        <button
+          id="levelSpeedButton"
+          class="selection-button selected"
+          type="button"
+        >
+          <span class="selection-icon">⚡</span>
+          <span>
+            <span class="selection-name">เร็วขึ้นตามเลเวล</span>
+            <span class="selection-description">
+              ทุก 10 แถว ความเร็วจะเพิ่มขึ้น
+            </span>
+          </span>
+        </button>
+
+        <button
+          id="fixedSpeedButton"
+          class="selection-button"
+          type="button"
+        >
+          <span class="selection-icon">🕹️</span>
+          <span>
+            <span class="selection-name">ความเร็วคงที่</span>
+            <span class="selection-description">
+              ความเร็วเท่าเดิมตลอดทั้งเกม
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <h3 class="selection-title">2. ชุดรูปทรงบล็อก</h3>
+
+      <div class="selection-grid">
+        <button
+          id="normalDifficultyButton"
+          class="selection-button selected"
+          type="button"
+        >
+          <span class="selection-icon">🟦</span>
+          <span>
+            <span class="selection-name">ระดับปกติ</span>
+            <span class="selection-description">
+              บล็อกมาตรฐาน 7 รูปแบบ
+            </span>
+          </span>
+        </button>
+
+        <button
+          id="challengeDifficultyButton"
+          class="selection-button challenge"
+          type="button"
+        >
+          <span class="selection-icon">✚</span>
+          <span>
+            <span class="selection-name">ระดับท้าทาย</span>
+            <span class="selection-description">
+              เพิ่มบล็อกเดี่ยว บล็อกคู่ และเครื่องหมายบวก
+            </span>
+          </span>
+        </button>
+      </div>
+
+      <button id="startGameButton" class="start-game-button" type="button">
+        เริ่มเกม
+      </button>
+    </section>
+  </div>
+
+  <!-- หยุดเกม -->
+  <div id="pauseOverlay" class="overlay hidden">
+    <section class="modal">
+      <div class="modal-icon">⏸️</div>
+      <h2>หยุดเกมชั่วคราว</h2>
+      <p class="modal-text">กดเล่นต่อเพื่อกลับเข้าสู่เกม</p>
+
+      <div class="modal-actions">
+        <button id="resumeButton" class="modal-action" type="button">
+          เล่นต่อ
+        </button>
+
+        <button id="pauseRestartButton" class="modal-action pink" type="button">
+          เริ่มรอบใหม่
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- ยืนยันเริ่มใหม่ -->
+  <div id="restartOverlay" class="overlay hidden">
+    <section class="modal">
+      <div class="modal-icon">🔄</div>
+      <h2>เริ่มเกมใหม่?</h2>
+      <p class="modal-text">
+        เกมปัจจุบันจะสิ้นสุดและเริ่มใหม่ด้วยตัวเลือกเดิม
+      </p>
+
+      <div class="modal-actions">
+        <button id="cancelRestartButton" class="modal-action" type="button">
+          เล่นต่อ
+        </button>
+
+        <button id="confirmRestartButton" class="modal-action pink" type="button">
+          เริ่มใหม่
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- เกมจบ -->
+  <div id="gameOverOverlay" class="overlay hidden">
+    <section class="modal">
+      <div class="modal-icon">💥</div>
+      <h2>เกมจบแล้ว</h2>
+      <p id="gameOverText" class="modal-text"></p>
+
+      <div class="statistics">
+        <div class="statistic-item">
+          <span>คะแนนรอบนี้</span>
+          <strong id="finalScore">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>คะแนนสูงสุด</span>
+          <strong id="finalBest">0</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="playAgainButton" class="modal-action pink" type="button">
+          เล่นแบบเดิม
+        </button>
+
+        <button id="changeModeButton" class="modal-action" type="button">
+          เปลี่ยนตัวเลือก
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <!-- สถิติสะสม -->
+  <div id="statsOverlay" class="overlay hidden">
+    <section class="modal">
+      <div class="modal-icon">📊</div>
+      <h2>สถิติสะสม</h2>
+
+      <div class="statistics">
+        <div class="statistic-item">
+          <span>คะแนนสะสม</span>
+          <strong id="totalScoreStat">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>คะแนนสูงสุด</span>
+          <strong id="bestScoreStat">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>แถวสะสม</span>
+          <strong id="totalLinesStat">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>จำนวนเกม</span>
+          <strong id="gamesPlayedStat">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>บล็อกที่วาง</span>
+          <strong id="piecesStat">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>เคลียร์ 4 แถว</span>
+          <strong id="tetrisStat">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>เกมระดับปกติ</span>
+          <strong id="normalGamesStat">0</strong>
+        </div>
+
+        <div class="statistic-item">
+          <span>เกมระดับท้าทาย</span>
+          <strong id="challengeGamesStat">0</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="closeStatsButton" class="modal-action" type="button">
+          ปิด
+        </button>
+
+        <button id="resetStatsButton" class="modal-action pink" type="button">
+          ล้างสถิติ
+        </button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    "use strict";
+
+    /* =========================
+       ค่าพื้นฐาน
+    ========================== */
+
+    const COLS = 10;
+    const ROWS = 20;
+    const BLOCK_SIZE = 30;
+    const CLEAR_DURATION = 460;
+
+    const COLORS = {
+      I: "#12bce2",
+      J: "#3d68e1",
+      L: "#ef8128",
+      O: "#e5c51e",
+      S: "#36bd5b",
+      T: "#9454d8",
+      Z: "#e93d60",
+
+      /* บล็อกพิเศษ */
+      M: "#ef65a0",
+      D: "#159e80",
+      P: "#6549c8"
+    };
+
+    const SHAPES = {
+      /* บล็อกมาตรฐาน */
+      I: [
+        [0, 0, 0, 0],
+        [1, 1, 1, 1],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+      ],
+
+      J: [
+        [1, 0, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+
+      L: [
+        [0, 0, 1],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+
+      O: [
+        [1, 1],
+        [1, 1]
+      ],
+
+      S: [
+        [0, 1, 1],
+        [1, 1, 0],
+        [0, 0, 0]
+      ],
+
+      T: [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 0, 0]
+      ],
+
+      Z: [
+        [1, 1, 0],
+        [0, 1, 1],
+        [0, 0, 0]
+      ],
+
+      /* บล็อกเดี่ยว */
+      M: [
+        [1]
+      ],
+
+      /* บล็อกคู่ */
+      D: [
+        [1, 1]
+      ],
+
+      /* เครื่องหมายบวก */
+      P: [
+        [0, 1, 0],
+        [1, 1, 1],
+        [0, 1, 0]
+      ]
+    };
+
+    const STANDARD_TYPES = [
+      "I", "J", "L", "O", "S", "T", "Z"
+    ];
+
+    const CHALLENGE_TYPES = [
+      "I", "J", "L", "O", "S", "T", "Z",
+      "M", "D", "P"
+    ];
+
+    /* =========================
+       อ้างอิง Element
+    ========================== */
+
+    const gameCanvas = document.getElementById("gameCanvas");
+    const ctx = gameCanvas.getContext("2d");
+
+    const nextCanvas = document.getElementById("nextCanvas");
+    const nextCtx = nextCanvas.getContext("2d");
+
+    const scoreElement = document.getElementById("score");
+    const bestScoreElement = document.getElementById("bestScore");
+    const linesElement = document.getElementById("lines");
+    const levelElement = document.getElementById("level");
+    const modeBox = document.getElementById("modeBox");
+    const difficultyBox = document.getElementById("difficultyBox");
+
+    const startOverlay = document.getElementById("startOverlay");
+    const pauseOverlay = document.getElementById("pauseOverlay");
+    const restartOverlay = document.getElementById("restartOverlay");
+    const gameOverOverlay = document.getElementById("gameOverOverlay");
+    const statsOverlay = document.getElementById("statsOverlay");
+
+    const levelSpeedButton =
+      document.getElementById("levelSpeedButton");
+
+    const fixedSpeedButton =
+      document.getElementById("fixedSpeedButton");
+
+    const normalDifficultyButton =
+      document.getElementById("normalDifficultyButton");
+
+    const challengeDifficultyButton =
+      document.getElementById("challengeDifficultyButton");
+
+    const startGameButton =
+      document.getElementById("startGameButton");
+
+    const pauseButton = document.getElementById("pauseButton");
+    const restartButton = document.getElementById("restartButton");
+    const statsButton = document.getElementById("statsButton");
+
+    const resumeButton = document.getElementById("resumeButton");
+
+    const pauseRestartButton =
+      document.getElementById("pauseRestartButton");
+
+    const cancelRestartButton =
+      document.getElementById("cancelRestartButton");
+
+    const confirmRestartButton =
+      document.getElementById("confirmRestartButton");
+
+    const playAgainButton =
+      document.getElementById("playAgainButton");
+
+    const changeModeButton =
+      document.getElementById("changeModeButton");
+
+    const closeStatsButton =
+      document.getElementById("closeStatsButton");
+
+    const resetStatsButton =
+      document.getElementById("resetStatsButton");
+
+    const leftButton = document.getElementById("leftButton");
+    const rightButton = document.getElementById("rightButton");
+    const downButton = document.getElementById("downButton");
+    const rotateButton = document.getElementById("rotateButton");
+
+    const finalScoreElement =
+      document.getElementById("finalScore");
+
+    const finalBestElement =
+      document.getElementById("finalBest");
+
+    const gameOverText =
+      document.getElementById("gameOverText");
+
+    const totalScoreStat =
+      document.getElementById("totalScoreStat");
+
+    const bestScoreStat =
+      document.getElementById("bestScoreStat");
+
+    const totalLinesStat =
+      document.getElementById("totalLinesStat");
+
+    const gamesPlayedStat =
+      document.getElementById("gamesPlayedStat");
+
+    const piecesStat =
+      document.getElementById("piecesStat");
+
+    const tetrisStat =
+      document.getElementById("tetrisStat");
+
+    const normalGamesStat =
+      document.getElementById("normalGamesStat");
+
+    const challengeGamesStat =
+      document.getElementById("challengeGamesStat");
+
+    /* =========================
+       สถานะเกม
+    ========================== */
+
+    let board = createEmptyBoard();
+    let currentPiece = null;
+    let nextPiece = null;
+    let bag = [];
+
+    let score = 0;
+    let lines = 0;
+    let level = 1;
+
+    let selectedSpeedMode = "level";
+    let selectedDifficulty = "normal";
+
+    let speedMode = "level";
+    let difficulty = "normal";
+
+    let running = false;
+    let paused = false;
+    let gameOver = false;
+    let clearing = false;
+
+    let clearRows = [];
+    let clearStartedAt = 0;
+
+    let pausedBeforeStats = false;
+    let lastTime = 0;
+    let dropCounter = 0;
+    let animationId = null;
+
+    let statistics = loadStatistics();
+
+    /* =========================
+       สถิติ
+    ========================== */
+
+    function defaultStatistics() {
+      return {
+        totalScore: 0,
+        bestScore: 0,
+        totalLines: 0,
+        gamesPlayed: 0,
+        piecesPlaced: 0,
+        tetrises: 0,
+        normalGames: 0,
+        challengeGames: 0
+      };
+    }
+
+    function loadStatistics() {
+      try {
+        const saved = JSON.parse(
+          localStorage.getItem(
+            "blockPocket3DFullStatistics"
+          )
+        );
+
+        return {
+          ...defaultStatistics(),
+          ...(saved || {})
+        };
+      } catch (error) {
+        return defaultStatistics();
+      }
+    }
+
+    function saveStatistics() {
+      try {
+        localStorage.setItem(
+          "blockPocket3DFullStatistics",
+          JSON.stringify(statistics)
+        );
+      } catch (error) {
+        /* เกมยังเล่นได้หากไม่รองรับ localStorage */
+      }
+    }
+
+    function updateStatisticsModal() {
+      totalScoreStat.textContent =
+        statistics.totalScore.toLocaleString("th-TH");
+
+      bestScoreStat.textContent =
+        statistics.bestScore.toLocaleString("th-TH");
+
+      totalLinesStat.textContent =
+        statistics.totalLines.toLocaleString("th-TH");
+
+      gamesPlayedStat.textContent =
+        statistics.gamesPlayed.toLocaleString("th-TH");
+
+      piecesStat.textContent =
+        statistics.piecesPlaced.toLocaleString("th-TH");
+
+      tetrisStat.textContent =
+        statistics.tetrises.toLocaleString("th-TH");
+
+      normalGamesStat.textContent =
+        statistics.normalGames.toLocaleString("th-TH");
+
+      challengeGamesStat.textContent =
+        statistics.challengeGames.toLocaleString("th-TH");
+    }
+
+    /* =========================
+       สร้างบล็อก
+    ========================== */
+
+    function createEmptyBoard() {
+      return Array.from(
+        { length: ROWS },
+        () => Array(COLS).fill(null)
+      );
+    }
+
+    function cloneMatrix(matrix) {
+      return matrix.map(row => [...row]);
+    }
+
+    function shuffle(array) {
+      const result = [...array];
+
+      for (let index = result.length - 1; index > 0; index--) {
+        const randomIndex = Math.floor(
+          Math.random() * (index + 1)
+        );
+
+        [result[index], result[randomIndex]] = [
+          result[randomIndex],
+          result[index]
+        ];
+      }
+
+      return result;
+    }
+
+    function refillBag() {
+      bag = shuffle(
+        difficulty === "challenge"
+          ? CHALLENGE_TYPES
+          : STANDARD_TYPES
+      );
+    }
+
+    function getNextType() {
+      if (bag.length === 0) {
+        refillBag();
+      }
+
+      return bag.pop();
+    }
+
+    function getTopPadding(matrix) {
+      let padding = 0;
+
+      for (const row of matrix) {
+        if (row.some(Boolean)) {
+          break;
+        }
+
+        padding++;
+      }
+
+      return padding;
+    }
+
+    function createPiece(type = getNextType()) {
+      const matrix = cloneMatrix(SHAPES[type]);
+
+      return {
+        type,
+        matrix,
+        color: COLORS[type],
+        x: Math.floor((COLS - matrix[0].length) / 2),
+        y: -getTopPadding(matrix)
+      };
+    }
+
+    function spawnNextPiece() {
+      currentPiece = nextPiece || createPiece();
+
+      currentPiece.x = Math.floor(
+        (COLS - currentPiece.matrix[0].length) / 2
+      );
+
+      currentPiece.y =
+        -getTopPadding(currentPiece.matrix);
+
+      nextPiece = createPiece();
+      drawNext();
+
+      if (collides(currentPiece)) {
+        finishGame();
+      }
+    }
+
+    /* =========================
+       เริ่มและวนเกม
+    ========================== */
+
+    function updateStartSelections() {
+      levelSpeedButton.classList.toggle(
+        "selected",
+        selectedSpeedMode === "level"
+      );
+
+      fixedSpeedButton.classList.toggle(
+        "selected",
+        selectedSpeedMode === "fixed"
+      );
+
+      normalDifficultyButton.classList.toggle(
+        "selected",
+        selectedDifficulty === "normal"
+      );
+
+      challengeDifficultyButton.classList.toggle(
+        "selected",
+        selectedDifficulty === "challenge"
+      );
+    }
+
+    function startGame() {
+      cancelAnimationFrame(animationId);
+
+      speedMode = selectedSpeedMode;
+      difficulty = selectedDifficulty;
+
+      board = createEmptyBoard();
+      bag = [];
+
+      score = 0;
+      lines = 0;
+      level = 1;
+
+      currentPiece = null;
+      nextPiece = createPiece();
+
+      running = true;
+      paused = false;
+      gameOver = false;
+      clearing = false;
+
+      clearRows = [];
+      clearStartedAt = 0;
+      dropCounter = 0;
+      lastTime = performance.now();
+
+      statistics.gamesPlayed++;
+
+      if (difficulty === "normal") {
+        statistics.normalGames++;
+      } else {
+        statistics.challengeGames++;
+      }
+
+      saveStatistics();
+
+      modeBox.textContent =
+        speedMode === "level"
+          ? "⚡ เร็วขึ้น"
+          : "🕹️ คงที่";
+
+      difficultyBox.textContent =
+        difficulty === "normal"
+          ? "มาตรฐาน"
+          : "ท้าทาย";
+
+      difficultyBox.classList.toggle(
+        "challenge",
+        difficulty === "challenge"
+      );
+
+      pauseButton.innerHTML = "⏸<br>หยุด";
+
+      startOverlay.classList.add("hidden");
+      pauseOverlay.classList.add("hidden");
+      restartOverlay.classList.add("hidden");
+      gameOverOverlay.classList.add("hidden");
+      statsOverlay.classList.add("hidden");
+
+      spawnNextPiece();
+      updateInterface();
+      draw();
+
+      animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function restartSameSettings() {
+      selectedSpeedMode = speedMode;
+      selectedDifficulty = difficulty;
+      updateStartSelections();
+      startGame();
+    }
+
+    function getDropInterval() {
+      if (speedMode === "fixed") {
+        return 650;
+      }
+
+      return Math.max(
+        85,
+        820 * Math.pow(0.82, level - 1)
+      );
+    }
+
+    function gameLoop(time = 0) {
+      if (!running || gameOver) {
+        return;
+      }
+
+      const delta = Math.min(time - lastTime, 100);
+      lastTime = time;
+
+      if (!paused) {
+        if (clearing) {
+          if (time - clearStartedAt >= CLEAR_DURATION) {
+            finishLineClear();
+          }
+        } else {
+          dropCounter += delta;
+
+          if (dropCounter >= getDropInterval()) {
+            softDrop(false);
+            dropCounter = 0;
+          }
+        }
+
+        draw(time);
+      }
+
+      animationId = requestAnimationFrame(gameLoop);
+    }
+
+    function canControl() {
+      return (
+        running &&
+        !paused &&
+        !gameOver &&
+        !clearing &&
+        currentPiece !== null
+      );
+    }
+
+    /* =========================
+       การชนและการเคลื่อนที่
+    ========================== */
+
+    function collides(
+      piece,
+      offsetX = 0,
+      offsetY = 0,
+      matrix = piece.matrix
+    ) {
+      for (let row = 0; row < matrix.length; row++) {
+        for (
+          let column = 0;
+          column < matrix[row].length;
+          column++
+        ) {
+          if (!matrix[row][column]) {
+            continue;
+          }
+
+          const x = piece.x + column + offsetX;
+          const y = piece.y + row + offsetY;
+
+          if (x < 0 || x >= COLS || y >= ROWS) {
+            return true;
+          }
+
+          if (y >= 0 && board[y][x]) {
+            return true;
+          }
+        }
+      }
+
+      return false;
+    }
+
+    function moveHorizontal(direction) {
+      if (!canControl()) {
+        return;
+      }
+
+      if (!collides(currentPiece, direction, 0)) {
+        currentPiece.x += direction;
+        draw();
+      }
+    }
+
+    function softDrop(givePoint = true) {
+      if (!canControl()) {
+        return;
+      }
+
+      if (!collides(currentPiece, 0, 1)) {
+        currentPiece.y++;
+
+        if (givePoint) {
+          addScore(1);
+        }
+
+        draw();
+        return;
+      }
+
+      lockPiece();
+      dropCounter = 0;
+    }
+
+    function rotateMatrix(matrix) {
+      return matrix[0].map(
+        (_, column) =>
+          matrix.map(row => row[column]).reverse()
+      );
+    }
+
+    function rotatePiece() {
+      if (!canControl()) {
+        return;
+      }
+
+      if (
+        currentPiece.type === "O" ||
+        currentPiece.type === "M" ||
+        currentPiece.type === "P"
+      ) {
+        return;
+      }
+
+      const rotated = rotateMatrix(currentPiece.matrix);
+
+      /*
+        ขยับชดเชยเมื่อหมุนใกล้ขอบหรือบล็อกอื่น
+      */
+      const kicks = [
+        [0, 0],
+        [-1, 0],
+        [1, 0],
+        [-2, 0],
+        [2, 0],
+        [0, -1]
+      ];
+
+      for (const [offsetX, offsetY] of kicks) {
+        if (
+          !collides(
+            currentPiece,
+            offsetX,
+            offsetY,
+            rotated
+          )
+        ) {
+          currentPiece.matrix = rotated;
+          currentPiece.x += offsetX;
+          currentPiece.y += offsetY;
+          draw();
+          return;
+        }
+      }
+    }
+
+    /* =========================
+       วางบล็อกและเคลียร์แถว
+    ========================== */
+
+    function lockPiece() {
+      if (!currentPiece) {
+        return;
+      }
+
+      let placedAboveBoard = false;
+
+      currentPiece.matrix.forEach((row, rowIndex) => {
+        row.forEach((value, columnIndex) => {
+          if (!value) {
+            return;
+          }
+
+          const x = currentPiece.x + columnIndex;
+          const y = currentPiece.y + rowIndex;
+
+          if (y < 0) {
+            placedAboveBoard = true;
+            return;
+          }
+
+          board[y][x] = {
+            type: currentPiece.type,
+            color: currentPiece.color
+          };
+        });
+      });
+
+      currentPiece = null;
+
+      if (placedAboveBoard) {
+        finishGame();
+        return;
+      }
+
+      statistics.piecesPlaced++;
+      saveStatistics();
+
+      const completedRows = findCompletedRows();
+
+      if (completedRows.length > 0) {
+        beginLineClear(completedRows);
+      } else {
+        spawnNextPiece();
+      }
+
+      updateInterface();
+      draw();
+    }
+
+    function findCompletedRows() {
+      const completed = [];
+
+      for (let row = 0; row < ROWS; row++) {
+        if (board[row].every(Boolean)) {
+          completed.push(row);
+        }
+      }
+
+      return completed;
+    }
+
+    /*
+      เริ่มเอฟเฟกต์แฟลช
+      ยังไม่ลบแถวทันที เพื่อให้เห็นการกระพริบก่อน
+    */
+    function beginLineClear(rowsToClear) {
+      clearing = true;
+      clearRows = [...rowsToClear];
+      clearStartedAt = performance.now();
+    }
+
+    /*
+      ทำงานหลังเอฟเฟกต์แฟลชจบ
+    */
+    function finishLineClear() {
+      const clearedCount = clearRows.length;
+
+      const rowsDescending = [...clearRows].sort(
+        (first, second) => second - first
+      );
+
+      rowsDescending.forEach(rowIndex => {
+        board.splice(rowIndex, 1);
+      });
+
+      for (let index = 0; index < clearedCount; index++) {
+        board.unshift(Array(COLS).fill(null));
+      }
+
+      const scoreTable = {
+        1: 100,
+        2: 300,
+        3: 500,
+        4: 800
+      };
+
+      const basePoints =
+        scoreTable[clearedCount] ||
+        800 + (clearedCount - 4) * 400;
+
+      addScore(basePoints * level);
+
+      lines += clearedCount;
+      statistics.totalLines += clearedCount;
+
+      if (clearedCount >= 4) {
+        statistics.tetrises++;
+      }
+
+      level = Math.floor(lines / 10) + 1;
+
+      saveStatistics();
+
+      clearing = false;
+      clearRows = [];
+      clearStartedAt = 0;
+
+      updateInterface();
+      spawnNextPiece();
+      draw();
+    }
+
+    function addScore(points) {
+      if (points <= 0) {
+        return;
+      }
+
+      score += points;
+      statistics.totalScore += points;
+
+      if (score > statistics.bestScore) {
+        statistics.bestScore = score;
+      }
+
+      saveStatistics();
+      updateInterface();
+    }
+
+    /* =========================
+       หยุด เริ่มใหม่ เกมจบ
+    ========================== */
+
+    function togglePause() {
+      if (!running || gameOver) {
+        return;
+      }
+
+      paused = !paused;
+
+      pauseOverlay.classList.toggle(
+        "hidden",
+        !paused
+      );
+
+      pauseButton.innerHTML = paused
+        ? "▶<br>เล่นต่อ"
+        : "⏸<br>หยุด";
+
+      if (!paused) {
+        lastTime = performance.now();
+
+        if (clearing) {
+          clearStartedAt = performance.now();
+        }
+      }
+
+      draw();
+    }
+
+    function openRestartConfirmation() {
+      if (!running || gameOver) {
+        startOverlay.classList.remove("hidden");
+        return;
+      }
+
+      paused = true;
+      pauseOverlay.classList.add("hidden");
+      restartOverlay.classList.remove("hidden");
+      pauseButton.innerHTML = "▶<br>เล่นต่อ";
+
+      draw();
+    }
+
+    function cancelRestart() {
+      restartOverlay.classList.add("hidden");
+
+      paused = false;
+      pauseButton.innerHTML = "⏸<br>หยุด";
+      lastTime = performance.now();
+
+      if (clearing) {
+        clearStartedAt = performance.now();
+      }
+
+      draw();
+    }
+
+    function finishGame() {
+      running = false;
+      gameOver = true;
+      clearing = false;
+
+      cancelAnimationFrame(animationId);
+
+      if (score > statistics.bestScore) {
+        statistics.bestScore = score;
+      }
+
+      saveStatistics();
+      updateInterface();
+
+      finalScoreElement.textContent =
+        score.toLocaleString("th-TH");
+
+      finalBestElement.textContent =
+        statistics.bestScore.toLocaleString("th-TH");
+
+      const difficultyName =
+        difficulty === "normal"
+          ? "ระดับปกติ"
+          : "ระดับท้าทาย";
+
+      gameOverText.textContent =
+        `${difficultyName} • เคลียร์ ${lines.toLocaleString("th-TH")} แถว • เลเวล ${level}`;
+
+      gameOverOverlay.classList.remove("hidden");
+    }
+
+    function updateInterface() {
+      scoreElement.textContent =
+        score.toLocaleString("th-TH");
+
+      bestScoreElement.textContent =
+        statistics.bestScore.toLocaleString("th-TH");
+
+      linesElement.textContent =
+        lines.toLocaleString("th-TH");
+
+      levelElement.textContent =
+        level.toLocaleString("th-TH");
+    }
+
+    /* =========================
+       วาดบล็อก 3D
+    ========================== */
+
+    function shadeColor(hex, amount) {
+      const value = parseInt(hex.replace("#", ""), 16);
+
+      const red = Math.max(
+        0,
+        Math.min(255, (value >> 16) + amount)
+      );
+
+      const green = Math.max(
+        0,
+        Math.min(255, ((value >> 8) & 255) + amount)
+      );
+
+      const blue = Math.max(
+        0,
+        Math.min(255, (value & 255) + amount)
+      );
+
+      return `rgb(${red},${green},${blue})`;
+    }
+
+    function roundedRect(
+      context,
+      x,
+      y,
+      width,
+      height,
+      radius
+    ) {
+      const safeRadius = Math.min(
+        radius,
+        width / 2,
+        height / 2
+      );
+
+      context.beginPath();
+      context.moveTo(x + safeRadius, y);
+      context.lineTo(x + width - safeRadius, y);
+
+      context.quadraticCurveTo(
+        x + width,
+        y,
+        x + width,
+        y + safeRadius
+      );
+
+      context.lineTo(
+        x + width,
+        y + height - safeRadius
+      );
+
+      context.quadraticCurveTo(
+        x + width,
+        y + height,
+        x + width - safeRadius,
+        y + height
+      );
+
+      context.lineTo(x + safeRadius, y + height);
+
+      context.quadraticCurveTo(
+        x,
+        y + height,
+        x,
+        y + height - safeRadius
+      );
+
+      context.lineTo(x, y + safeRadius);
+
+      context.quadraticCurveTo(
+        x,
+        y,
+        x + safeRadius,
+        y
+      );
+
+      context.closePath();
+    }
+
+    function drawBlock(
+      context,
+      x,
+      y,
+      color,
+      size = BLOCK_SIZE,
+      alpha = 1
+    ) {
+      const gap = Math.max(1.4, size * .06);
+      const blockSize = size - gap;
+      const radius = Math.max(3, size * .15);
+      const bevel = Math.max(3, size * .17);
+
+      context.save();
+      context.globalAlpha = alpha;
+
+      context.shadowColor = "rgba(23,42,58,.36)";
+      context.shadowBlur = size * .13;
+      context.shadowOffsetY = size * .09;
+
+      const gradient = context.createLinearGradient(
+        x,
+        y,
+        x + blockSize,
+        y + blockSize
+      );
+
+      gradient.addColorStop(
+        0,
+        shadeColor(color, 62)
+      );
+
+      gradient.addColorStop(.4, color);
+
+      gradient.addColorStop(
+        1,
+        shadeColor(color, -44)
+      );
+
+      roundedRect(
+        context,
+        x + gap / 2,
+        y + gap / 2,
+        blockSize,
+        blockSize,
+        radius
+      );
+
+      context.fillStyle = gradient;
+      context.fill();
+      context.shadowColor = "transparent";
+
+      /* ขอบสว่างด้านบน */
+      context.beginPath();
+      context.moveTo(x + radius, y + gap);
+      context.lineTo(
+        x + blockSize - radius,
+        y + gap
+      );
+      context.lineTo(
+        x + blockSize - bevel,
+        y + bevel
+      );
+      context.lineTo(x + bevel, y + bevel);
+      context.closePath();
+      context.fillStyle = "rgba(255,255,255,.46)";
+      context.fill();
+
+      /* ขอบสว่างด้านซ้าย */
+      context.beginPath();
+      context.moveTo(x + gap, y + radius);
+      context.lineTo(x + bevel, y + bevel);
+      context.lineTo(
+        x + bevel,
+        y + blockSize - bevel
+      );
+      context.lineTo(
+        x + gap,
+        y + blockSize - radius
+      );
+      context.closePath();
+      context.fillStyle = "rgba(255,255,255,.2)";
+      context.fill();
+
+      /* ขอบมืดด้านล่าง */
+      context.beginPath();
+      context.moveTo(
+        x + bevel,
+        y + blockSize - bevel
+      );
+      context.lineTo(
+        x + blockSize - bevel,
+        y + blockSize - bevel
+      );
+      context.lineTo(
+        x + blockSize - radius,
+        y + blockSize - gap
+      );
+      context.lineTo(
+        x + radius,
+        y + blockSize - gap
+      );
+      context.closePath();
+      context.fillStyle = "rgba(0,0,0,.24)";
+      context.fill();
+
+      /* แสงสะท้อน */
+      context.beginPath();
+      context.ellipse(
+        x + blockSize * .32,
+        y + blockSize * .27,
+        blockSize * .17,
+        blockSize * .07,
+        -.35,
+        0,
+        Math.PI * 2
+      );
+      context.fillStyle = "rgba(255,255,255,.37)";
+      context.fill();
+
+      context.restore();
+    }
+
+    function drawBackground() {
+      ctx.clearRect(
+        0,
+        0,
+        gameCanvas.width,
+        gameCanvas.height
+      );
+
+      const gradient = ctx.createLinearGradient(
+        0,
+        0,
+        0,
+        gameCanvas.height
+      );
+
+      gradient.addColorStop(0, "#f1feff");
+      gradient.addColorStop(.55, "#d4f3f9");
+      gradient.addColorStop(1, "#b6dfeb");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(
+        0,
+        0,
+        gameCanvas.width,
+        gameCanvas.height
+      );
+
+      /* แถบพื้นสลับสีอ่อน */
+      ctx.fillStyle = "rgba(255,255,255,.2)";
+
+      for (let row = 0; row < ROWS; row += 2) {
+        ctx.fillRect(
+          0,
+          row * BLOCK_SIZE,
+          gameCanvas.width,
+          BLOCK_SIZE
+        );
+      }
+
+      /* เส้นตาราง */
+      ctx.strokeStyle = "rgba(33,85,110,.25)";
+      ctx.lineWidth = 1;
+
+      for (let column = 0; column <= COLS; column++) {
+        ctx.beginPath();
+        ctx.moveTo(column * BLOCK_SIZE, 0);
+        ctx.lineTo(
+          column * BLOCK_SIZE,
+          ROWS * BLOCK_SIZE
+        );
+        ctx.stroke();
+      }
+
+      for (let row = 0; row <= ROWS; row++) {
+        ctx.beginPath();
+        ctx.moveTo(0, row * BLOCK_SIZE);
+        ctx.lineTo(
+          COLS * BLOCK_SIZE,
+          row * BLOCK_SIZE
+        );
+        ctx.stroke();
+      }
+
+      ctx.strokeStyle = "rgba(25,70,92,.55)";
+      ctx.lineWidth = 3;
+      ctx.strokeRect(
+        1.5,
+        1.5,
+        gameCanvas.width - 3,
+        gameCanvas.height - 3
+      );
+    }
+
+    function drawBoard() {
+      for (let row = 0; row < ROWS; row++) {
+        for (let column = 0; column < COLS; column++) {
+          const cell = board[row][column];
+
+          if (cell) {
+            drawBlock(
+              ctx,
+              column * BLOCK_SIZE,
+              row * BLOCK_SIZE,
+              cell.color
+            );
+          }
+        }
+      }
+    }
+
+    function drawPiece(piece) {
+      if (!piece) {
+        return;
+      }
+
+      piece.matrix.forEach((row, rowIndex) => {
+        row.forEach((value, columnIndex) => {
+          if (!value) {
+            return;
+          }
+
+          const x = piece.x + columnIndex;
+          const y = piece.y + rowIndex;
+
+          if (y >= 0) {
+            drawBlock(
+              ctx,
+              x * BLOCK_SIZE,
+              y * BLOCK_SIZE,
+              piece.color
+            );
+          }
+        });
+      });
+    }
+
+    function getGhostY() {
+      if (!currentPiece) {
+        return 0;
+      }
+
+      let ghostY = currentPiece.y;
+
+      while (
+        !collides(
+          {
+            ...currentPiece,
+            y: ghostY
+          },
+          0,
+          1
+        )
+      ) {
+        ghostY++;
+      }
+
+      return ghostY;
+    }
+
+    function drawGhost() {
+      if (!currentPiece) {
+        return;
+      }
+
+      const ghostY = getGhostY();
+
+      ctx.save();
+      ctx.strokeStyle =
+        shadeColor(currentPiece.color, -35);
+      ctx.fillStyle = "rgba(35,75,95,.07)";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]);
+
+      currentPiece.matrix.forEach(
+        (row, rowIndex) => {
+          row.forEach((value, columnIndex) => {
+            if (!value) {
+              return;
+            }
+
+            const x = currentPiece.x + columnIndex;
+            const y = ghostY + rowIndex;
+
+            if (y < 0) {
+              return;
+            }
+
+            roundedRect(
+              ctx,
+              x * BLOCK_SIZE + 4,
+              y * BLOCK_SIZE + 4,
+              BLOCK_SIZE - 8,
+              BLOCK_SIZE - 8,
+              5
+            );
+
+            ctx.fill();
+            ctx.stroke();
+          });
+        }
+      );
+
+      ctx.restore();
+    }
+
+    /*
+      เอฟเฟกต์แฟลชแถว:
+      สลับขาว เหลือง และโปร่งใสหลายรอบ
+    */
+    function drawLineClearFlash(time) {
+      if (!clearing || clearRows.length === 0) {
+        return;
+      }
+
+      const elapsed = time - clearStartedAt;
+      const progress = Math.min(
+        1,
+        elapsed / CLEAR_DURATION
+      );
+
+      const pulse =
+        (Math.sin(progress * Math.PI * 8) + 1) / 2;
+
+      clearRows.forEach(row => {
+        const y = row * BLOCK_SIZE;
+
+        ctx.save();
+
+        ctx.fillStyle =
+          `rgba(255,255,255,${0.28 + pulse * 0.68})`;
+
+        ctx.fillRect(
+          0,
+          y,
+          gameCanvas.width,
+          BLOCK_SIZE
+        );
+
+        ctx.fillStyle =
+          `rgba(255,221,77,${pulse * 0.62})`;
+
+        ctx.fillRect(
+          0,
+          y + BLOCK_SIZE * .22,
+          gameCanvas.width,
+          BLOCK_SIZE * .56
+        );
+
+        ctx.strokeStyle =
+          `rgba(255,255,255,${0.5 + pulse * .5})`;
+
+        ctx.lineWidth = 3;
+
+        ctx.strokeRect(
+          1.5,
+          y + 1.5,
+          gameCanvas.width - 3,
+          BLOCK_SIZE - 3
+        );
+
+        ctx.restore();
+      });
+    }
+
+    function draw(time = performance.now()) {
+      drawBackground();
+      drawBoard();
+
+      if (currentPiece && !clearing) {
+        drawGhost();
+        drawPiece(currentPiece);
+      }
+
+      drawLineClearFlash(time);
+
+      if (paused && running) {
+        ctx.fillStyle = "rgba(37,76,95,.66)";
+        ctx.fillRect(
+          0,
+          0,
+          gameCanvas.width,
+          gameCanvas.height
+        );
+
+        ctx.fillStyle = "white";
+        ctx.font = "bold 25px Tahoma";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(
+          "หยุดชั่วคราว",
+          gameCanvas.width / 2,
+          gameCanvas.height / 2
+        );
+      }
+    }
+
+    function drawNext() {
+      nextCtx.clearRect(
+        0,
+        0,
+        nextCanvas.width,
+        nextCanvas.height
+      );
+
+      nextCtx.fillStyle = "#effbea";
+
+      nextCtx.fillRect(
+        0,
+        0,
+        nextCanvas.width,
+        nextCanvas.height
+      );
+
+      if (!nextPiece) {
+        return;
+      }
+
+      const matrix = nextPiece.matrix;
+      const previewBlock =
+        matrix.length >= 3 ? 12 : 14;
+
+      let minRow = matrix.length;
+      let maxRow = 0;
+      let minColumn = matrix[0].length;
+      let maxColumn = 0;
+
+      matrix.forEach((row, rowIndex) => {
+        row.forEach((value, columnIndex) => {
+          if (!value) {
+            return;
+          }
+
+          minRow = Math.min(minRow, rowIndex);
+          maxRow = Math.max(maxRow, rowIndex);
+          minColumn = Math.min(minColumn, columnIndex);
+          maxColumn = Math.max(maxColumn, columnIndex);
+        });
+      });
+
+      const width =
+        (maxColumn - minColumn + 1) * previewBlock;
+
+      const height =
+        (maxRow - minRow + 1) * previewBlock;
+
+      const offsetX =
+        (nextCanvas.width - width) / 2;
+
+      const offsetY =
+        (nextCanvas.height - height) / 2;
+
+      matrix.forEach((row, rowIndex) => {
+        row.forEach((value, columnIndex) => {
+          if (!value) {
+            return;
+          }
+
+          drawBlock(
+            nextCtx,
+            offsetX +
+              (columnIndex - minColumn) * previewBlock,
+            offsetY +
+              (rowIndex - minRow) * previewBlock,
+            nextPiece.color,
+            previewBlock
+          );
+        });
+      });
+    }
+
+    /* =========================
+       ปุ่มกดค้าง
+    ========================== */
+
+    function bindRepeatButton(
+      button,
+      action,
+      repeatDelay = 210,
+      repeatSpeed = 65
+    ) {
+      let timeoutId = null;
+      let intervalId = null;
+
+      function stop() {
+        clearTimeout(timeoutId);
+        clearInterval(intervalId);
+
+        timeoutId = null;
+        intervalId = null;
+
+        button.classList.remove("pressed");
+      }
+
+      function start(event) {
+        event.preventDefault();
+
+        button.setPointerCapture?.(event.pointerId);
+
+        stop();
+        button.classList.add("pressed");
+        action();
+
+        timeoutId = setTimeout(() => {
+          intervalId = setInterval(
+            action,
+            repeatSpeed
+          );
+        }, repeatDelay);
+      }
+
+      button.addEventListener("pointerdown", start);
+      button.addEventListener("pointerup", stop);
+      button.addEventListener("pointercancel", stop);
+      button.addEventListener("lostpointercapture", stop);
+    }
+
+    function bindSingleButton(button, action) {
+      function stop() {
+        button.classList.remove("pressed");
+      }
+
+      button.addEventListener(
+        "pointerdown",
+        event => {
+          event.preventDefault();
+
+          button.setPointerCapture?.(event.pointerId);
+          button.classList.add("pressed");
+
+          action();
+        }
+      );
+
+      button.addEventListener("pointerup", stop);
+      button.addEventListener("pointercancel", stop);
+      button.addEventListener("lostpointercapture", stop);
+    }
+
+    bindRepeatButton(
+      leftButton,
+      () => moveHorizontal(-1)
+    );
+
+    bindRepeatButton(
+      rightButton,
+      () => moveHorizontal(1)
+    );
+
+    bindRepeatButton(
+      downButton,
+      () => softDrop(true),
+      130,
+      42
+    );
+
+    bindSingleButton(
+      rotateButton,
+      rotatePiece
+    );
+
+    /* =========================
+       คีย์บอร์ด
+    ========================== */
+
+    document.addEventListener("keydown", event => {
+      const preventKeys = [
+        "ArrowLeft",
+        "ArrowRight",
+        "ArrowDown",
+        "ArrowUp"
+      ];
+
+      if (preventKeys.includes(event.code)) {
+        event.preventDefault();
+      }
+
+      if (
+        event.repeat &&
+        [
+          "ArrowUp",
+          "KeyW",
+          "KeyX",
+          "KeyZ"
+        ].includes(event.code)
+      ) {
+        return;
+      }
+
+      switch (event.code) {
+        case "ArrowLeft":
+        case "KeyA":
+          moveHorizontal(-1);
+          break;
+
+        case "ArrowRight":
+        case "KeyD":
+          moveHorizontal(1);
+          break;
+
+        case "ArrowDown":
+        case "KeyS":
+          softDrop(true);
+          break;
+
+        case "ArrowUp":
+        case "KeyW":
+        case "KeyX":
+        case "KeyZ":
+          rotatePiece();
+          break;
+
+        case "KeyP":
+        case "Escape":
+          togglePause();
+          break;
+
+        case "KeyR":
+          openRestartConfirmation();
+          break;
+      }
+    });
+
+    /* =========================
+       Event หน้าต่างและตัวเลือก
+    ========================== */
+
+    levelSpeedButton.addEventListener(
+      "click",
+      () => {
+        selectedSpeedMode = "level";
+        updateStartSelections();
+      }
+    );
+
+    fixedSpeedButton.addEventListener(
+      "click",
+      () => {
+        selectedSpeedMode = "fixed";
+        updateStartSelections();
+      }
+    );
+
+    normalDifficultyButton.addEventListener(
+      "click",
+      () => {
+        selectedDifficulty = "normal";
+        updateStartSelections();
+      }
+    );
+
+    challengeDifficultyButton.addEventListener(
+      "click",
+      () => {
+        selectedDifficulty = "challenge";
+        updateStartSelections();
+      }
+    );
+
+    startGameButton.addEventListener(
+      "click",
+      startGame
+    );
+
+    pauseButton.addEventListener(
+      "click",
+      togglePause
+    );
+
+    resumeButton.addEventListener(
+      "click",
+      togglePause
+    );
+
+    restartButton.addEventListener(
+      "click",
+      openRestartConfirmation
+    );
+
+    cancelRestartButton.addEventListener(
+      "click",
+      cancelRestart
+    );
+
+    confirmRestartButton.addEventListener(
+      "click",
+      () => {
+        restartOverlay.classList.add("hidden");
+        restartSameSettings();
+      }
+    );
+
+    pauseRestartButton.addEventListener(
+      "click",
+      () => {
+        pauseOverlay.classList.add("hidden");
+        restartSameSettings();
+      }
+    );
+
+    playAgainButton.addEventListener(
+      "click",
+      restartSameSettings
+    );
+
+    changeModeButton.addEventListener(
+      "click",
+      () => {
+        gameOverOverlay.classList.add("hidden");
+
+        selectedSpeedMode = speedMode;
+        selectedDifficulty = difficulty;
+
+        updateStartSelections();
+        startOverlay.classList.remove("hidden");
+      }
+    );
+
+    statsButton.addEventListener(
+      "click",
+      () => {
+        pausedBeforeStats = paused;
+
+        if (
+          running &&
+          !paused &&
+          !gameOver
+        ) {
+          paused = true;
+          pauseButton.innerHTML = "▶<br>เล่นต่อ";
+          draw();
+        }
+
+        updateStatisticsModal();
+        statsOverlay.classList.remove("hidden");
+      }
+    );
+
+    closeStatsButton.addEventListener(
+      "click",
+      () => {
+        statsOverlay.classList.add("hidden");
+
+        if (
+          running &&
+          !gameOver &&
+          !pausedBeforeStats
+        ) {
+          paused = false;
+          pauseButton.innerHTML = "⏸<br>หยุด";
+          lastTime = performance.now();
+
+          if (clearing) {
+            clearStartedAt = performance.now();
+          }
+
+          draw();
+        }
+      }
+    );
+
+    resetStatsButton.addEventListener(
+      "click",
+      () => {
+        const confirmed = window.confirm(
+          "ต้องการล้างสถิติสะสมทั้งหมดหรือไม่?"
+        );
+
+        if (!confirmed) {
+          return;
+        }
+
+        statistics = defaultStatistics();
+
+        saveStatistics();
+        updateStatisticsModal();
+        updateInterface();
+      }
+    );
+
+    document.addEventListener(
+      "visibilitychange",
+      () => {
+        if (
+          document.hidden &&
+          running &&
+          !paused &&
+          !gameOver
+        ) {
+          togglePause();
+        }
+      }
+    );
+
+    /* =========================
+       เริ่มต้นหน้าเว็บ
+    ========================== */
+
+    updateStartSelections();
+    updateInterface();
+    updateStatisticsModal();
+    drawBackground();
+    drawNext();
+  </script>
+</body>
+</html>
